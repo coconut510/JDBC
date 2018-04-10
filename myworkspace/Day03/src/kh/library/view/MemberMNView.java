@@ -99,7 +99,7 @@ public class MemberMNView {
 			m.setAddr(sc.nextLine());
 			
 			System.out.print("회원 성별을 입력해 주세요.(남/녀) ");
-			m.setUser_name((sc.next().equals("남")?"M":"F"));
+			m.setGender((sc.next().equals("남")?"M":"F"));
 			
 			if(mc.joinMember(m)>0) System.out.println("회원가입이 정상적으로 됐습니다.");
 			else System.out.println("회원가입에 실패했습니다.");
@@ -115,7 +115,16 @@ public class MemberMNView {
 		{
 			Member m = new Member();
 			m.setUser_id(id);
-			System.out.println("");
+			System.out.print("새로운 이름을 입력하세요.");
+			m.setUser_name(sc.next());
+			
+			sc.nextLine();
+			
+			System.out.print("새로운 주소를 입력하세요.");
+			m.setAddr(sc.nextLine());
+			
+			if(mc.updateMember(m)>0) System.out.println("수정이 완료됐습니다.");
+			else System.out.println("수정을 실패했습니다.");
 		}
 		else
 		{
@@ -124,7 +133,24 @@ public class MemberMNView {
 	}
 	public void signOutMember()
 	{
-		
+		System.out.print("탈퇴할 아이디를 입력하세요");
+		String id = sc.next();
+		if(mc.memberSearchId(id)!=null)
+		{
+			if(mc.memberRentChk(id))
+			{
+				if(mc.signOutMember(id)>0) System.out.println("회원 탈퇴가 완료됐습니다.");
+				else System.out.println("회원 탈퇴를 실패했습니다.");
+			}
+			else
+			{
+				System.out.println("도서 대여중인 회원은 삭제할수 없습니다.");
+			}
+		}
+		else
+		{
+			System.out.println(id + " 회원정보를 찾을수 없습니다.");
+		}
 	}
 	public void backToMainMenu()
 	{

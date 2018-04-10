@@ -19,5 +19,14 @@ public class MemberController {
 	public int joinMember(Member m) {
 		return mdao.joinMember(m);
 	}
+	public int updateMember(Member m) {
+		return mdao.updateMember(m);
+	}
+	public int signOutMember(String id) {
+		return mdao.signOutMember(id);
+	}
+	public boolean memberRentChk(String id) {
+		return mdao.bookRentChk(id);
+	}
 
 }

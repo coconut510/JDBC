@@ -20,7 +20,7 @@ public class MemberDAO {
 			
 			stmt = conn.createStatement();
 			
-			String query = "SELECT * FROM customer";
+			String query = "SELECT * FROM customer ORDER BY 1";
 			
 			rset = stmt.executeQuery(query);
 			
@@ -153,7 +153,7 @@ public class MemberDAO {
 			
 			stmt = conn.createStatement();
 			
-			String query = "INSERT INTO MEMBER VALUES((SELECT MAX(USER_NO) + 1 FROM MEMBER),"
+			String query = "INSERT INTO CUSTOMER VALUES((SELECT MAX(USER_NO) + 1 FROM CUSTOMER),"
 												+	 "'" + m.getUser_id() + "',"
 												+	 "'" + m.getUser_name() + "',"
 												+	 "" + m.getUser_age() + ","
@@ -184,4 +184,103 @@ public class MemberDAO {
 		
 	}
 
+	public int updateMember(Member m) {
+		Connection conn = null;
+		Statement stmt = null;
+		int result = 0;
+		
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			
+			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe","student","student");
+		
+			stmt = conn.createStatement();
+			
+			String query = "UPDATE CUSTOMER SET (USER_NAME,ADDR) = (SELECT '" + m.getUser_name()+
+																		 "','" + m.getAddr() + "' FROM DUAL)"
+					 		+ " WHERE USER_ID = '" + m.getUser_id() + "'";
+			
+			result = stmt.executeUpdate(query);
+			if(result>0) conn.commit();
+			else conn.rollback();
+														
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return result;
+	}
+
+	public boolean bookRentChk(String id)
+	{
+		Connection conn = null;
+		Statement stmt = null;
+		int result = 0;
+		String query = "SELECT USER_ID FROM LIBRARY WHERE USER_ID  = '" + id +"'";
+		
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			
+			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe","student","student");
+			
+			stmt = conn.createStatement();
+			
+			result = stmt.executeUpdate(query);
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}			
+		
+		return result<1;
+	}
+	
+	
+	public int signOutMember(String id) {
+		Connection conn = null;
+		Statement stmt = null;
+		int result = 0;
+		
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			
+			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe","student","student");
+			
+			stmt = conn.createStatement();
+			
+			String query = "DELETE CUSTOMER WHERE USER_ID = '" +id + "'";
+			
+			result = stmt.executeUpdate(query);
+			
+			if(result>0) conn.commit();
+			else conn.rollback();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
 }

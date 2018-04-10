@@ -23,7 +23,7 @@ public class BookDAO {
 			
 			stmt = conn.createStatement();
 			
-			String query = "SELECT * FROM BOOK";
+			String query = "SELECT * FROM BOOK ORDER BY 1";
 			
 			rset = stmt.executeQuery(query);
 			
@@ -140,6 +140,44 @@ public class BookDAO {
 		return result;
 	}
 	
+	public Book bookChk(String name)
+	{
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rset = null;
+		String query = "SELECT BOOK_NO FROM BOOK WHERE BOOK_NAME  = '" + name + "'";
+		Book b = null;
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			
+			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe","student","student");
+			
+			stmt = conn.createStatement();
+			
+			rset = stmt.executeQuery(query);
+			if(rset.next())
+			{
+				b = new Book();
+				b.setBook_no(rset.getInt("book_no"));
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}			
+		finally
+		{
+			try {
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return b;
+	}
+	
 	public boolean bookRentChk(int bookCode)
 	{
 		Connection conn = null;
@@ -161,7 +199,16 @@ public class BookDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}			
-		
+		finally
+		{
+			try {
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return result<1;
 	}
 
