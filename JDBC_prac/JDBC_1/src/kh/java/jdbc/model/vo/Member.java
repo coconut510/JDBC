@@ -14,6 +14,15 @@ public class Member {
 	private String hobby;
 	private Date enrollDate;
 	public Member() {} // 기본 생성자
+	
+	@Override
+	public String toString()
+	{
+		return this.memberId + "  " + this.memberName + "  " + this.memberPwd + "  "
+				+ this.gender + "  " + this.age + "  " + this.email + "  "
+				+ this.phone + "  "  + this.address + "  " + this.hobby+ "  "
+				 + this.enrollDate;
+	}
 	public String getMemberId() {
 		return memberId;
 	}
@@ -74,4 +83,5 @@ public class Member {
 	public void setEnrollDate(Date enrollDate) {
 		this.enrollDate = enrollDate;
 	}
+	
 }
