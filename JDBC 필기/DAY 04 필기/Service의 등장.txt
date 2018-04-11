@@ -1,0 +1,5 @@
+@ Service
+
+기존 비즈니스 모델의 문제점
+
+View -> Controller -> DAO -> DB
