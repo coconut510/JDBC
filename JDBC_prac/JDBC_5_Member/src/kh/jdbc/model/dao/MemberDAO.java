@@ -1,18 +1,31 @@
 package kh.jdbc.model.dao;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import static kh.jdbc.common.MemberTemplete.*;
 import kh.jdbc.model.vo.Member;
 
 public class MemberDAO {
-
+	private Properties prop = new Properties();
+	public MemberDAO() {
+			try {
+			prop.load(new FileReader("resource/query.properties"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+		}
+	}
 	public ArrayList<Member> selectAll(Connection conn) {
 		Statement stmt = null;
 		ResultSet rset = null;
 		ArrayList<Member> list = new ArrayList<Member>();
-		String query = "select * from member";
+		String query = prop.getProperty("selectAll");
 		
 		try {
 			stmt = conn.createStatement();
@@ -46,15 +59,15 @@ public class MemberDAO {
 	}
 
 	public Member selectMemberId(Connection conn, String memberId) {
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		Member m = null;
 		try {
-			stmt = conn.createStatement();
-			
-			String query = "SELECT * FROM MEMBER WHERE MEMBER_ID = '" + memberId + "'";
-			
-			rset = stmt.executeQuery(query);
+			String query =prop.getProperty("selectOne");
+
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, memberId);
+			rset = pstmt.executeQuery();
 			
 			if(rset.next())
 			{
@@ -77,41 +90,42 @@ public class MemberDAO {
 		finally
 		{
 			close(rset);
-			close(stmt);
+			close(pstmt);
 		}
 		return m;
 	}
 
 	public int deletemember(Connection conn, String memberId) {
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		int result = 0;
 		try {
-			stmt = conn.createStatement();
+			String query = prop.getProperty("delete");
 			
-			String query = "DELETE FROM MEMBER WHERE MEMBER_ID = '" + memberId +"'";
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, memberId);
 			
-			result = stmt.executeUpdate(query);
+			result = pstmt.executeUpdate(query);
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		finally
 		{
-			close(stmt);
+			close(pstmt);
 		}
 		return result;
 	}
 
 	public ArrayList<Member> selectMemberName(Connection conn, String name) {
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		ArrayList<Member> list = new ArrayList<Member>();
 		try {
-			stmt = conn.createStatement();
+			String query = prop.getProperty("selectSearchName") ;
 			
-			String query = "SELECT * FROM MEMBER WHERE MEMBER_NAME LIKE '%" + name + "%'" ;
-			
-			rset = stmt.executeQuery(query);
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, name);
+			rset = pstmt.executeQuery();
 			
 			while(rset.next())
 			{
@@ -135,7 +149,7 @@ public class MemberDAO {
 		finally
 		{
 			close(rset);
-			close(stmt);
+			close(pstmt);
 		}
 		
 		return list;
@@ -146,7 +160,7 @@ public class MemberDAO {
 		int result = 0;
 		
 		try {
-			String query = "INSERT INTO MEMBER VALUES (?,?,?,?,?,?,?,?,?,SYSDATE)";
+			String query = prop.getProperty("insert");
 			
 			pstmt = conn.prepareStatement(query);
 			pstmt.setString(1, m.getMemberId());
@@ -172,22 +186,21 @@ public class MemberDAO {
 	}
 
 	public int insertDelMember(Connection conn, String memberId) {
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		int result = 0;
 		
 		try {
-			stmt = conn.createStatement();
-			
-			String query = "INSERT INTO DEL_MEMBER (SELECT MEMBER_ID, MEMBER_NAME,PHONE,ENROLL_DATE, SYSDATE FROM MEMBER"
-					+ " WHERE MEMBER_ID = '" + memberId +"')";
-			
-			result = stmt.executeUpdate(query);
+			String query = prop.getProperty("deleteInInsert");
+
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, memberId);
+			result = pstmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		finally
 		{
-			close(stmt);
+			close(pstmt);
 		}
 		return result;
 	}
@@ -196,8 +209,7 @@ public class MemberDAO {
 		PreparedStatement pstmt = null;
 		int result = 0;
 		try {
-			String query = "UPDATE MEMBER SET (MEMBER_PWD,EMAIL,PHONE,ADDRESS) = (SELECT ?,?,?,? FROM DUAL)"
-					+ " WHERE MEMBER_ID = ?";
+			String query = prop.getProperty("update");
 			pstmt = conn.prepareStatement(query);
 			pstmt.setString(1, m.getMemberPwd());
 			pstmt.setString(2, m.getEmail());
