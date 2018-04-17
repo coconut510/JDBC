@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import static kh.jdbc.common.MemberTemplete.*;
+
+import kh.jdbc.Exception.MemberException;
 import kh.jdbc.model.vo.Member;
 
 public class MemberDAO {
@@ -21,7 +23,7 @@ public class MemberDAO {
 				e.printStackTrace();
 		}
 	}
-	public ArrayList<Member> selectAll(Connection conn) {
+	public ArrayList<Member> selectAll(Connection conn) throws MemberException {
 		Statement stmt = null;
 		ResultSet rset = null;
 		ArrayList<Member> list = new ArrayList<Member>();
@@ -48,7 +50,8 @@ public class MemberDAO {
 				list.add(m);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
+			throw new MemberException("DAO 클래스의 selectAll() 메소드 처리 불가 -> " + e.getMessage());
 		}
 		finally
 		{

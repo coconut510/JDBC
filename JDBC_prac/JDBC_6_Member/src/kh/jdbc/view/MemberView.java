@@ -37,10 +37,12 @@ public class MemberView {
 	public void showAllMember()
 	{
 		ArrayList<Member> list = mc.showAllMember();
-		
-		for(Member m : list)
+		if(list.size()>0) 
 		{
-			System.out.println(m.toString());
+			for(Member m : list)
+			{
+				System.out.println(m.toString());
+			}
 		}
 	}
 	
