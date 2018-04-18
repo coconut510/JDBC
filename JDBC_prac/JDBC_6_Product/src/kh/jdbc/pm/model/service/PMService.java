@@ -15,12 +15,36 @@ public class PMService {
 		Template.close(conn);
 		return list;
 	}
-	public Product search(String searchKey, String type) {
+	public ArrayList<Product> search(String searchKey, String type) {
 		Connection conn = Template.getConnection();
-		Product p = type.equals("id")?pmDAO.searchId(conn,searchKey ):
+		ArrayList<Product> list = type.equals("id")?pmDAO.searchId(conn,searchKey ):
 									  pmDAO.searchName(conn,searchKey );
 		Template.close(conn);
-		return p;
+		return list;
+	}
+	public int addProduct(Product p) {
+		Connection conn = Template.getConnection();
+		int result = pmDAO.addProduct(conn,p);
+		if(result>0) Template.commit(conn);
+		else Template.rollback(conn);
+		Template.close(conn);
+		return result;
+	}
+	public int editProduct(Product p) {
+		Connection conn = Template.getConnection();
+		int result = pmDAO.editProduct(conn, p);
+		if(result>0) Template.commit(conn);
+		else Template.rollback(conn);
+		Template.close(conn);
+		return result;
+	}
+	public int delProduct(String id) {
+		Connection conn = Template.getConnection();
+		int result = pmDAO.delProduct(conn, id);
+		if(result>0) Template.commit(conn);
+		else Template.rollback(conn);
+		Template.close(conn);
+		return result;
 	}
 
 }

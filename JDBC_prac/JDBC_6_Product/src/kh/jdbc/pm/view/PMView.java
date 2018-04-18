@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -26,6 +27,8 @@ public class PMView extends JFrame{
 	private JPanel btnPanel = new JPanel();
 	
 	private String[] columNames = {"product_id","p_name","price","description"};
+//	private HashMap<Integer,Product> localMap = new HashMap<Integer,Product>();
+	private String originId="";
 	private Object[][] data = {};
 	// 모델 생성(데이터, 컬럼명)
 	private	DefaultTableModel model = new DefaultTableModel(data, columNames)
@@ -61,19 +64,25 @@ public class PMView extends JFrame{
 	
 	public void removeAll()
 	{
-		int row = model.getRowCount();
-		for(int i = row-1; i>=0 ;i-- )
-		{
-			model.removeRow(i);
-		}
+//		int row = model.getRowCount();
+//		for(int i = row-1; i>=0 ;i-- )
+//		{
+//			model.removeRow(i);
+//		}
+		model.setRowCount(0);
+//		model.getDataVector().removeAllElements();
+//		model.fireTableDataChanged();
 	}
 	public void initValue()
 	{
 		removeAll();
 		ArrayList<Product> list = pmC.showList();
+//		localMap.clear();
+		int i = 0;
 		for(Product p :list)
 		{
 			Object[] obj = {p.getProduct_id(),p.getP_name(),p.getPrice(),p.getDescription()};
+//			localMap.put(i++, p);
 			model.addRow(obj);
 		}
 		this.repaint();
@@ -100,10 +109,19 @@ public class PMView extends JFrame{
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
-//				int row = table.getSelectedRow();
-//				String name = table.getValueAt(row, 0).toString();
-//				String age = table.getValueAt(row, 1).toString();
-//				String addr = table.getValueAt(row, 2).toString();
+				int row = table.getSelectedRow();
+				if(row!=-1) 
+				{
+					String id = table.getValueAt(row, 0).toString();
+					String name = table.getValueAt(row, 1).toString();
+					int price = (int) table.getValueAt(row, 2);
+					String desc = table.getValueAt(row, 3).toString();
+					productIdTP.setText(id);
+					productNameTP .setText(name);
+					spinner.setValue(price);
+					productDsTP.setText(desc);
+					originId = id;
+				}
 			}
 		});
 		scrollpane.setSize(new Dimension(550,600));
@@ -146,12 +164,22 @@ public class PMView extends JFrame{
 	public void searchResult()
 	{
 		removeAll();
-		Product p = pmC.serachBtn(productIdRb.isSelected(),
+		ArrayList<Product> list = pmC.serach(productIdRb.isSelected(),
 				  productNameRb.isSelected(),
 				  searchKey.getText());
-		System.out.println(p.toString());
-		Object[] obj = {p.getProduct_id(),p.getP_name(),p.getPrice(),p.getDescription()};
-		model.addRow(obj);
+		if(list.size()>0) 
+		{
+			for(Product p :list) 
+			{
+				Object[] obj = {p.getProduct_id(), p.getP_name(),p.getPrice(),p.getDescription()};
+				model.addRow(obj);
+			}
+		}
+		else
+		{
+			popup( searchKey.getText() + " 상품을 찾을수 없습니다.");
+		}
+		searchKey.setText("");
 	}
 	
 	private JLabel title = new JLabel("                                             -----상세 보기-----");
@@ -216,13 +244,91 @@ public class PMView extends JFrame{
 	public void btnInit()
 	{
 		btnPanel.add(addBtn);
-		addBtn.addActionListener(e-> pmC.addProduct());
+		addBtn.addActionListener(e-> addProductBtn());
 		btnPanel.add(editBtn);
-		editBtn.addActionListener(e-> pmC.editProduct());
+		editBtn.addActionListener(e-> editProductBtn());
 		btnPanel.add(delBtn);
-		delBtn.addActionListener(e-> pmC.delProduct());
+		delBtn.addActionListener(e-> delProductBtn());
 		managePanel.add(btnPanel);
 //		managePanel.add(descriptionPanel);
+	}
+	
+	public void addProductBtn()
+	{
+		if(pmC.serach(true,false, productIdTP.getText()).size()==0) 
+		{
+			Product p = new Product();
+			p.setProduct_id(productIdTP.getText());
+			p.setP_name(productNameTP.getText());
+			p.setPrice((int)spinner.getValue());
+			p.setDescription(productDsTP.getText());
+			
+			if(pmC.addProduct(p)>0)
+			{
+				popup(productNameTP.getText() + "상품이 정상적으로 추가됐습니다.");
+				Object[] obj = {p.getProduct_id(),p.getP_name(),p.getPrice(),p.getDescription()};
+				model.addRow(obj);
+			}
+			else popup("상품추가에 실패했습니다.");
+		}
+		else
+		{
+			popup("이미 있는 상품입니다.");
+		}
+	}
+	public void editProductBtn()
+	{
+		if(table.getSelectedRow()!=-1) 
+		{
+			if(productIdTP.getText().length()>0 && productNameTP.getText().length()>0  && (int)spinner.getValue()>0 &&productDsTP.getText().length()>0 )
+			{
+				Product p = new Product();
+				p.setProduct_id(productIdTP.getText());
+				p.setP_name(productNameTP.getText());
+				p.setPrice((int)spinner.getValue());
+				p.setDescription(productDsTP.getText());
+				p.setOrigin_id(originId);
+				
+				if(pmC.editProduct(p)>0) 
+				{
+					Object[] obj =  {p.getProduct_id(), p.getP_name(),p.getPrice(),p.getDescription()};
+					popup(productNameTP.getText() + "상품이 정상적으로 수정됐습니다.");
+					int row = table.getSelectedRow();
+					model.insertRow(row, obj);
+					model.removeRow(row+1);
+				}
+				else popup("상품 정보 수정에 실패했습니다.");
+			}
+			else
+			{
+				popup("빈 항목이 있거나 가격이 0원이면 상품을 추가할수 없습니다.");
+			}
+		}
+		else
+		{
+			popup("수정할 상품을 선택해주세요.");
+		}
+	
+	}
+	public void delProductBtn()
+	{
+		if(table.getSelectedRow()!=-1) 
+		{
+			if(pmC.serach(true,false, productIdTP.getText())!=null) 
+			{
+				if(pmC.delProduct(productIdTP.getText())>0) 
+				{
+					popup(productNameTP.getText() + "상품이 정상적으로 삭제됐습니다.");
+					model.removeRow(table.getSelectedRow());
+				}
+				else popup("상품삭제에 실패했습니다.");
+			}
+			else popup(productIdTP.getText() + " 아이디인 상품이 존재하지 않습니다.");
+		}
+		else
+		{
+			popup("수정할 상품을 선택해주세요.");
+		}
 	}
 	private JPanel emptyPanel = new JPanel();
 	public void emptyInit()
@@ -230,7 +336,10 @@ public class PMView extends JFrame{
 		managePanel.add(emptyPanel);
 	}
 
-	
+	public void popup(String message)
+	{
+		JOptionPane.showMessageDialog(this,message);
+	}
 	public void viewInit()
 	{
 		this.add(tablePanel, BorderLayout.WEST);

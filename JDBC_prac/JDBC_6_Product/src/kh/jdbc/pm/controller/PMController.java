@@ -19,22 +19,30 @@ public class PMController {
 		return pmService.showListBtn();
 	}
 
-	public Product serachBtn(boolean id, boolean name, String searchKey) {
-		Product p = null;
-		if(id) p = pmService.search(searchKey,"id");
-		else p = pmService.search(searchKey,"name");
-		return p;
+	public ArrayList<Product> serach(boolean id, boolean name, String searchKey) {
+		 ArrayList<Product> list =new ArrayList<Product>();
+		if(id) list = pmService.search(searchKey,"id");
+		else list = pmService.search(searchKey,"name");
+		System.out.println(list.size());
+		return list;
 	}
 	
 
-	public void addProduct() {
+	public int addProduct(Product p) {
+		int result = 0;
+		result = pmService.addProduct(p);
+		return result;
 	}
 
-	public Object editProduct() {
-		return null;
+	public int editProduct(Product p) {
+		int result = 0;
+		result = pmService.editProduct(p);
+		return result;
 	}
 
-	public Object delProduct() {
-		return null;
+	public int delProduct(String id) {
+		int result = 0;
+		result  = pmService.delProduct(id);
+		return result;
 	}
 }

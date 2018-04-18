@@ -5,6 +5,14 @@ public class Product {
 	private String p_name;
 	private int price;
 	private String description;
+	private String origin_id;
+	
+	public String getOrigin_id() {
+		return origin_id;
+	}
+	public void setOrigin_id(String origin_id) {
+		this.origin_id = origin_id;
+	}
 	public String getProduct_id() {
 		return product_id;
 	}
